@@ -83,6 +83,9 @@ function Dashboard() {
   }, [month, summary, historyRetry]);
   const expenses = transactions.filter(tx => tx.kind === 'expense');
   const budgetTotal = budgets.reduce((total, budget) => total + Number(budget.limit_amount), 0);
+  const spentThisMonth = Number(summary?.expenses ?? 0);
+  const remainingBudget = Math.round((budgetTotal - spentThisMonth) * 100) / 100;
+  const hasMonthlyData = summary?.month === month && !message;
   const spend = useMemo(() => Object.fromEntries((summary?.by_category ?? []).map(x => [x.category, Number(x.amount)])), [summary]);
   async function saveTx(tx: TxInput) {
     const saved = editing ? await api.updateTx(editing.id, tx) : await api.createTx(tx);
@@ -104,12 +107,19 @@ function Dashboard() {
     <div className="content"><div className="page-head"><div><h1>{NAV.find(item => item.screen === screen)?.label}</h1>{screen === 'dashboard' && <p className="dashboard-greeting">Welcome back, {user.name}!</p>}<p className="muted">{screen === 'settings' ? 'Manage your session' : monthName(month, 'long')}</p></div>{screen === 'transactions' && <button className="secondary" onClick={exportCsv}><Download size={16}/> Export CSV</button>}</div>
     {message && <div role="alert" className="notice">{message} <button onClick={reload}>Retry</button></div>}
     {loading && <div className="small-loading">Refreshing data…</div>}
-    {screen === 'dashboard' && <div className="stats-grid">
+    {screen === 'dashboard' && <div className="stats-grid dashboard-stats">
       <Stat title="Spent this month" value={money(summary?.expenses ?? 0)} icon={<Wallet size={19}/>} variant="mint" subtitle="Total expenses"/>
       <button className="stat stat-button" onClick={() => setScreen('budgets')}>
         <div className="stat-icon amber">₹</div><span className="stat-label">Monthly budget</span><strong>{money(budgetTotal)}</strong>
         {budgetTotal > 0 ? <div className="budget-meter"><progress aria-label="Monthly budget used" value={Math.min(Number(summary?.expenses ?? 0), budgetTotal)} max={budgetTotal}/><span>{Math.round(Number(summary?.expenses ?? 0) / budgetTotal * 100)}% used</span></div> : <span className="stat-subtitle">Set a monthly budget</span>}
       </button>
+      <Stat
+        title="Remaining budget"
+        value={hasMonthlyData && budgetTotal > 0 ? money(Math.abs(remainingBudget)) : '—'}
+        icon={<Target size={19}/>}
+        variant={hasMonthlyData && budgetTotal > 0 && remainingBudget < 0 ? 'rose' : 'mint'}
+        subtitle={!hasMonthlyData ? (message ? 'Budget unavailable' : 'Loading budget…') : budgetTotal <= 0 ? 'Set a monthly budget to see what’s left' : remainingBudget < 0 ? 'Over budget this month' : 'Left to spend this month'}
+      />
       <Stat title="Expenses" value={String(expenses.length)} icon={<List size={19}/>} variant="sky" subtitle="Entries this month"/>
     </div>}
     {(screen === 'dashboard' || screen === 'reports' || screen === 'categories') && <div className={screen === 'dashboard' ? 'dashboard-grid overview-charts' : 'report-charts'}>
