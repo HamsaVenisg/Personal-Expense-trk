@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+*.db
+*.db-journal
+# JS
+node_modules/
+dist/
+# Secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+# Editor / OS
+.vscode/*.log
+.DS_Store
+Thumbs.db
+*.tsbuildinfo
