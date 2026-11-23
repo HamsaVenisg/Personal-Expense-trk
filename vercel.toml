@@ -1,0 +1,15 @@
+[services.web]
+root = "frontend/"
+framework = "vite"
+
+[services.api]
+root = "backend/"
+entrypoint = "app.main:app"
+
+[[rewrites]]
+source = "/(.*)"
+destination = { service = "web" }
+
+[[rewrites]]
+source = "/api/(.*)"
+destination = { service = "api" }
