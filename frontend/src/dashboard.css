@@ -115,3 +115,13 @@
   .expense-workspace .chart-row { flex-direction: row; }
 }
 .expense-workspace .account-button { border: 0; flex-shrink: 0; }
+
+.expense-workspace .dashboard-greeting {
+  margin: 0 0 5px;
+  color: var(--spendwise-accent);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+@media (min-width: 801px) {
+  .expense-workspace .page-head:has(.dashboard-greeting) { padding-right: 320px; }
+}
